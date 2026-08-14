@@ -1,0 +1,18 @@
+[package]
+name = "corridor-escrow"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = []
+
+[dependencies]
+corridor-common = { path = "../common" }
+soroban-sdk = "20.5.0"
+
+[dev-dependencies]
+soroban-sdk = { version = "20.5.0", features = ["testutils"] }
