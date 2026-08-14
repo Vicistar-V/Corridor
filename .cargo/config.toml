@@ -1,0 +1,8 @@
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))']
+rustflags = [
+    "-C", "link-arg=--no-entry",
+    "-C", "link-arg=-zstack-size=131072",
+    "-C", "link-arg=--import-memory",
+    "-C", "link-arg=--export-table",
+    "-C", "link-arg=--max-memory=67108864",
+]

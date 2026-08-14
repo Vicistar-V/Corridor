@@ -1,0 +1,13 @@
+[workspace]
+resolver = "2"
+members = [
+    "contracts/common",
+    "contracts/corridor-escrow",
+    "contracts/agent-registry",
+    "contracts/rate-oracle-adapter",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
