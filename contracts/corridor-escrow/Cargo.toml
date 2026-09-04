@@ -11,8 +11,12 @@ crate-type = ["cdylib", "rlib"]
 default = []
 
 [dependencies]
+agent-registry = { path = "../agent-registry" }
 corridor-common = { path = "../common" }
+rate-oracle-adapter = { path = "../rate-oracle-adapter" }
 soroban-sdk = "20.5.0"
 
 [dev-dependencies]
 soroban-sdk = { version = "20.5.0", features = ["testutils"] }
+agent-registry = { path = "../agent-registry", features = ["testutils"] }
+rate-oracle-adapter = { path = "../rate-oracle-adapter", features = ["testutils"] }

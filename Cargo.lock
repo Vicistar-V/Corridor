@@ -178,7 +178,9 @@ dependencies = [
 name = "corridor-escrow"
 version = "0.1.0"
 dependencies = [
+ "agent-registry",
  "corridor-common",
+ "rate-oracle-adapter",
  "soroban-sdk",
 ]
 

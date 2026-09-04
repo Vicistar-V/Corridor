@@ -1,27 +1,52 @@
 #![allow(dead_code)]
 
 use corridor_common::types::Transfer;
-use soroban_sdk::{Address, Symbol};
+use soroban_sdk::{contracttype, Address, Env, Symbol};
 
-/// Transfer record storage helpers for corridor-escrow. One logical transfer
-/// record per remittance (README "Smart Contracts > 1. corridor-escrow").
-///
-/// Day 1 scaffold: signatures only, bodies are `todo!()` pending Day 3.
+/// Storage key for a single `Transfer` record, keyed by `transfer_id`.
+#[contracttype]
+pub struct TransferKey(pub u64);
+
+/// Create a new `Transfer` record in `Locked` status and persist it.
 pub fn create_transfer(
-    _transfer_id: u64,
-    _sender: Address,
-    _recipient: Address,
-    _corridor_id: Symbol,
-    _amount: i128,
-    _token: Address,
+    env: &Env,
+    transfer_id: u64,
+    sender: Address,
+    recipient: Address,
+    corridor_id: Symbol,
+    amount: i128,
+    token: Address,
+    created_at: u64,
 ) -> Transfer {
-    todo!()
+    let transfer = Transfer {
+        transfer_id,
+        sender,
+        recipient,
+        corridor_id,
+        amount,
+        token,
+        locked_rate: None,
+        status: corridor_common::types::TransferStatus::Locked,
+        created_at,
+        rate_expiry: 0,
+        delivery_deadline: 0,
+    };
+    save_transfer(env, &transfer);
+    transfer
 }
 
-pub fn load_transfer(_transfer_id: u64) -> Transfer {
-    todo!()
+pub fn load_transfer(env: &Env, transfer_id: u64) -> Transfer {
+    if !env.storage().persistent().has(&TransferKey(transfer_id)) {
+        panic!("transfer not found");
+    }
+    env.storage()
+        .persistent()
+        .get(&TransferKey(transfer_id))
+        .unwrap()
 }
 
-pub fn save_transfer(_transfer: &Transfer) {
-    todo!()
+pub fn save_transfer(env: &Env, transfer: &Transfer) {
+    env.storage()
+        .persistent()
+        .set(&TransferKey(transfer.transfer_id), transfer);
 }
