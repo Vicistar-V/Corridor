@@ -181,8 +181,8 @@ corridor/
 
 ### Prerequisites
 
-- [Rust](https://www.rust-lang.org/tools/install) (stable) + `wasm32-unknown-unknown` target
-- [Soroban CLI](https://developers.stellar.org/docs/tools/developer-tools#cli)
+- [Rust](https://www.rust-lang.org/tools/install) (stable) + `wasm32v1-none` target
+- [Soroban CLI](https://developers.stellar.org/docs/tools/developer-tools#cli) (the `soroban` command is provided by the modern Stellar CLI, installed as `stellar`)
 - [Node.js](https://nodejs.org/) 18+ and npm/pnpm
 - [Freighter wallet](https://www.freighter.app/) browser extension (for testnet interaction)
 
@@ -191,14 +191,14 @@ corridor/
 ```bash
 git clone https://github.com/<your-org>/corridor.git
 cd corridor
-rustup target add wasm32-unknown-unknown
+rustup target add wasm32v1-none
 ```
 
 ### 2. Build the contracts
 
 ```bash
 cd contracts
-cargo build --target wasm32-unknown-unknown --release
+cargo build --target wasm32v1-none --release
 ```
 
 ### 3. Run contract tests
@@ -225,6 +225,16 @@ cd frontend/sender-app
 npm install
 npm run dev
 ```
+
+Open the printed URL, connect **Freighter** on testnet, add a `DEMOUSDC`
+trustline for your wallet, and fund it:
+
+```bash
+./scripts/mint_test_usdc.sh testnet <your G-address>
+```
+
+The app is wired to the testnet contracts deployed by `./scripts/deploy.sh`
+(that script regenerates `frontend/sender-app/src/contracts.ts`).
 
 ---
 

@@ -1,8 +1,10 @@
-[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))']
-rustflags = [
-    "-C", "link-arg=--no-entry",
-    "-C", "link-arg=-zstack-size=131072",
-    "-C", "link-arg=--import-memory",
-    "-C", "link-arg=--export-table",
-    "-C", "link-arg=--max-memory=67108864",
-]
+# Contracts are compiled for the `wasm32v1-none` target — the only wasm target
+# Soroban's protocol-28 VM accepts. Build and deploy with:
+#
+#   cargo build --workspace --target wasm32v1-none --release
+#   ./scripts/deploy.sh testnet
+#
+# The historical SDK-20 rustflags below (--export-table, --import-memory, ...)
+# targeted `wasm32-unknown-unknown` and are intentionally removed: on modern
+# Rust toolchains that combination also enables reference-types/multivalue
+# encodings that Soroban's wasm validator rejects at deploy time.
