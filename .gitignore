@@ -1,2 +1,6 @@
 /target
 test_snapshots/
+
+# Deployment state written by scripts/deploy.sh (reads inputs, not sources).
+scripts/.contracts.*.env
+frontend/*/node_modules/
