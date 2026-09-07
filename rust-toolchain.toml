@@ -1,0 +1,7 @@
+# The Soroban 20.x dependency graph pins `ethnum = "=1.5.0"`, whose error.rs
+# does `unsafe { mem::transmute(()) }` to construct a `TryFromIntError`. Rust
+# changed TryFromIntError's layout in 1.97, so that transmute no longer
+# compiles there. 1.96.0 is the newest rustc that builds the current stack.
+[toolchain]
+channel = "1.96.0"
+targets = ["wasm32v1-none"]

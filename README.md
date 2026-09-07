@@ -370,6 +370,12 @@ opening an issue:
   `rustup target add wasm32v1-none` and build with
   `cargo build --workspace --target wasm32v1-none --release`
   (`.cargo/config.toml` documents why).
+- **Rust toolchain is pinned.** `rust-toolchain.toml` pins channel `1.96.0`
+  (with the `wasm32v1-none` target). The Soroban 20.x dependency graph pins
+  `ethnum = "=1.5.0"`, which Rust 1.97+ rejects (`E0512`: `TryFromIntError`
+  changed size). `rustup` auto-installs the pinned channel on first `cargo`
+  use, and CI reads the same file — don't compile the contracts with a newer
+  rustc.
 - **The `soroban` command lives in the Stellar CLI.** `soroban` is provided by
   the modern CLI installed as `stellar`; the scripts prefer `soroban`, then
   fall back to `stellar`. Either works on `PATH`.
