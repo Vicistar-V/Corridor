@@ -218,23 +218,68 @@ soroban keys fund deployer --network testnet
 ./scripts/deploy.sh testnet
 ```
 
-### 5. Run the frontend
+### 5. Run the frontends
+
+The repo ships two frontends that share the same testnet contract deployment:
 
 ```bash
+# Sender app — initiates and funds transfers
 cd frontend/sender-app
 npm install
 npm run dev
 ```
 
-Open the printed URL, connect **Freighter** on testnet, add a `DEMOUSDC`
-trustline for your wallet, and fund it:
+```bash
+# Agent dashboard — picked up by a registered payout agent
+cd frontend/agent-dashboard
+npm install
+npm run dev
+```
+
+Open the printed URLs, connect **Freighter** on testnet to a funded wallet, add
+a `DEMOUSDC` trustline, and fund it:
 
 ```bash
 ./scripts/mint_test_usdc.sh testnet <your G-address>
 ```
 
-The app is wired to the testnet contracts deployed by `./scripts/deploy.sh`
-(that script regenerates `frontend/sender-app/src/contracts.ts`).
+Both apps are wired to the testnet contracts deployed by `./scripts/deploy.sh`
+(that script regenerates `frontend/<app>/src/contracts.ts` for **both**
+frontends, so every frontend observes the same on-chain transfer lifecycle).
+
+### 6. Run the full end-to-end demo (sender → agent → delivery)
+
+This is the core proof that the sender and agent frontends form one working
+loop against the same testnet contracts:
+
+1. **Sender app** (`localhost:5173`): as the `sender` wallet, pick the
+   `USNG` corridor, enter an amount (e.g. `100`) and a recipient, then
+   **Initiate** → **Approve + fund escrow**.
+2. **Deployer wallet** (operator controls in the sender app): **Refresh rate**,
+   **Lock rate**, then **Assign agent** (auto-selects a verified agent).
+   The transfer is now `AgentAssigned` and awaiting payout.
+3. **Agent dashboard** (`localhost:5174`): connect Freighter with the same
+   registered **agent wallet** (e.g. `agent1`). The dashboard shows a green
+   *verified agent* pill. Look up the transfer id from step 1 and track it —
+   it reports `AgentAssigned`.
+4. **Off-chain payout** (manual/external, out of scope for the foundation):
+   the agent hands over cash / mobile money / bank deposit to the recipient
+   directly.
+5. **Agent dashboard**: tick *Off-chain payout completed*, then **Submit
+   delivery attestation**. The wallet signs the attestation; the escrow
+   contract releases the funds (recipient, agent fee, protocol fee).
+6. **Sender app**: refresh the transfer — the status timeline reaches
+   **Delivered**.
+
+> Headless / CI note: the browser steps above need the Freighter extension, so
+> they cannot run unattended in CI. The identical on-chain lifecycle is
+> driven end-to-end against the same live deployment by
+> `./scripts/verify_lifecycle.sh testnet`. The last verified run walked
+> transfer **#2** to `Delivered` with the expected split (recipient
+> `970000000`, agent fee `20000000`, protocol fee `10000000` DEMOUSDC units)
+> and the agent dashboard's runtime read calls (`get_agents_for_corridor`,
+> `status`) confirmed the same contracts return `AgentAssigned`-eligible
+> agents and the final `Delivered` status.
 
 ---
 
