@@ -28,7 +28,6 @@ mod tests {
         registry_id: Address,
         oracle_id: Address,
         token: Address,
-        token_admin: Address,
         admin: Address,
         treasury: Address,
         sender: Address,
@@ -38,13 +37,13 @@ mod tests {
     }
 
     impl Contracts {
-        fn escrow(&self, env: &Env) -> CorridorEscrowClient {
+        fn escrow(&self, env: &Env) -> CorridorEscrowClient<'_> {
             CorridorEscrowClient::new(env, &self.escrow_id)
         }
-        fn registry(&self, env: &Env) -> AgentRegistryClient {
+        fn registry(&self, env: &Env) -> AgentRegistryClient<'_> {
             AgentRegistryClient::new(env, &self.registry_id)
         }
-        fn oracle(&self, env: &Env) -> RateOracleAdapterClient {
+        fn oracle(&self, env: &Env) -> RateOracleAdapterClient<'_> {
             RateOracleAdapterClient::new(env, &self.oracle_id)
         }
         fn token_bal(&self, env: &Env, addr: &Address) -> i128 {
@@ -79,7 +78,6 @@ mod tests {
             registry_id,
             oracle_id,
             token,
-            token_admin,
             admin,
             treasury,
             sender,
@@ -90,7 +88,7 @@ mod tests {
     }
 
     fn register_agent(env: &Env, registry: &AgentRegistryClient, addr: &Address) {
-        let mut corridor_ids = soroban_sdk::vec![env, Symbol::new(env, "USNG")];
+        let corridor_ids = soroban_sdk::vec![env, Symbol::new(env, "USNG")];
         let agent = Agent {
             address: addr.clone(),
             corridor_ids,
@@ -373,5 +371,20 @@ mod tests {
         let (env, c) = setup();
         let escrow = c.escrow(&env);
         assert_eq!(escrow.try_fund(&999).unwrap_err().unwrap(), Error::TransferNotFound);
+    }
+
+    #[test]
+    fn assign_accepts_any_verified_agent_in_corridor() {
+        let (env, c) = setup();
+        let escrow = c.escrow(&env);
+        let id = funded(&env, &c, c.recipient.clone());
+
+        // agent2 is registered + verified for USNG and must be assignable,
+        // so it is a legitimate delivery agent, not just registry decoration.
+        escrow.assign_agent(&id, &c.agent2);
+        assert_eq!(escrow.status(&id), TransferStatus::AgentAssigned);
+
+        let listed = c.registry(&env).get_agents_for_corridor(&Symbol::new(&env, "USNG"));
+        assert_eq!(listed.len(), 2);
     }
 }
